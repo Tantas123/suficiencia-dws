@@ -42,6 +42,8 @@ export default class Sessao {
   }
 
   static destruir(req, res) {
+    const id = Sessao.#obterId(req);
+    if (id) Sessao.#sessoes.delete(id);
     res.setHeader(
       'Set-Cookie',
       `${Sessao.NOME_COOKIE}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`

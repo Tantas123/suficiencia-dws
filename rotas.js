@@ -13,6 +13,6 @@ router.get('/logout', [AuthController, 'logout']);
 
 router.get('/feedbacks', [FeedbackController, 'index'], { protegida: true });
 router.get('/feedbacks/{idFeedback}', [FeedbackController, 'show'], { protegida: true });
-router.put('/feedback/atualizar', [FeedbackController, 'atualizar'], { protegida: true });
+router.put('/feedback/atualizar', [FeedbackController, 'update'], { protegida: true });
 
 export default router;
