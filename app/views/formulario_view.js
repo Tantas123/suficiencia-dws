@@ -22,7 +22,7 @@ export default function formularioView({ tipos = [], sucesso = false, erros = []
 
   return layout(
     'Novo feedback',
-    `<div class="topo"><h1>Envie seu feedback</h1></div>
+    `<div class="topo"><h1>Envie seu feedback</h1><a href="/login">Área administrativa</a></div>
 ${mensagens.join('\n')}
 <form method="POST" action="/feedback/cadastrar">
   <label for="titulo">Título</label>

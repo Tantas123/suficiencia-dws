@@ -1,17 +1,26 @@
 import bodyParser from './bodyParser.js';
+import Sessao from './Sessao.js';
 
 export default class Router {
   #rotas = [];
 
-  get(caminho, acao) {
-    return this.#adicionar('GET', caminho, acao);
+  get(caminho, acao, opcoes = {}) {
+    return this.#adicionar('GET', caminho, acao, opcoes);
   }
 
-  post(caminho, acao) {
-    return this.#adicionar('POST', caminho, acao);
+  post(caminho, acao, opcoes = {}) {
+    return this.#adicionar('POST', caminho, acao, opcoes);
   }
 
-  #adicionar(metodo, caminho, acao) {
+  put(caminho, acao, opcoes = {}) {
+    return this.#adicionar('PUT', caminho, acao, opcoes);
+  }
+
+  delete(caminho, acao, opcoes = {}) {
+    return this.#adicionar('DELETE', caminho, acao, opcoes);
+  }
+
+  #adicionar(metodo, caminho, acao, opcoes) {
     const nomesParametros = [];
     const padrao = Router.#normalizar(caminho)
       .split('/')
@@ -30,6 +39,7 @@ export default class Router {
       regex: new RegExp(`^${padrao}$`),
       nomesParametros,
       acao,
+      protegida: Boolean(opcoes.protegida),
     });
     return this;
   }
@@ -61,6 +71,10 @@ export default class Router {
       let corpo = {};
       if (metodo === 'POST' || metodo === 'PUT' || metodo === 'DELETE') {
         corpo = await bodyParser(req);
+        if (metodo === 'POST' && corpo._method) {
+          const metodoReal = String(corpo._method).toUpperCase();
+          if (['PUT', 'DELETE', 'PATCH'].includes(metodoReal)) metodo = metodoReal;
+        }
       }
 
       const metodoBusca = metodo === 'HEAD' ? 'GET' : metodo;
@@ -71,6 +85,12 @@ export default class Router {
         if (!correspondencia) continue;
         caminhoExiste = true;
         if (rota.metodo !== metodoBusca) continue;
+
+        if (rota.protegida && !Sessao.estaLogado(req)) {
+          res.writeHead(302, { Location: '/login' });
+          res.end();
+          return;
+        }
 
         const parametros = rota.nomesParametros.map((_, i) => correspondencia[i + 1]);
         const [ClasseController, nomeMetodo] = rota.acao;

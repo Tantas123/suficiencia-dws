@@ -34,7 +34,11 @@ export default class FeedbackController extends Controller {
 
     this.render(
       this.res,
-      feedbacksShowView({ feedback })
+      feedbacksShowView({
+        feedback,
+        statusDisponiveis: Feedback.STATUS,
+        atualizado: this.query.atualizado === '1',
+      })
     );
   }
 
@@ -62,5 +66,32 @@ export default class FeedbackController extends Controller {
     const feedback = new Feedback();
     await feedback.cadastrar(titulo, descricao, tipo);
     this.redirect(this.res, '/?sucesso=1');
+  }
+
+  async update(id = this.corpo.id, status = this.corpo.status) {
+    const idNumerico = FeedbackController.#idValido(id);
+    const model = new Feedback();
+    const feedback = idNumerico ? await model.buscarPorId(idNumerico) : null;
+
+    if (!feedback) {
+      this.render(this.res, paginaErro('Feedback não encontrado', 'O feedback informado não existe.', '/feedbacks'), 404);
+      return;
+    }
+
+    if (!Feedback.statusValido(status)) {
+      this.render(
+        this.res,
+        feedbacksShowView({
+          feedback,
+          statusDisponiveis: Feedback.STATUS,
+          erro: 'Status inválido.',
+        }),
+        400
+      );
+      return;
+    }
+
+    await model.atualizarStatus(idNumerico, status);
+    this.redirect(this.res, `/feedbacks/${idNumerico}?atualizado=1`);
   }
 }

@@ -17,7 +17,7 @@ export default function feedbacksView({ feedbacks = [] }) {
 
   return layout(
     'Feedbacks',
-    `<div class="topo"><h1>Feedbacks</h1></div>
+    `<div class="topo"><h1>Feedbacks</h1><a href="/logout">Sair</a></div>
 <table>
   <thead>
     <tr><th>ID</th><th>Título</th><th>Tipo</th><th>Status</th><th></th></tr>
